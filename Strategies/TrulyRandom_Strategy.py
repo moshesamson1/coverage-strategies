@@ -3,9 +3,6 @@ import random
 
 def sublist(lst1, lst2):
     return all([(x in lst2) for x in lst1])
-   # ls1 = [element for element in lst1 if element in lst2]
-   # ls2 = [element for element in lst2 if element in lst1]
-   # return ls1 == ls2
 
 class TrulyRandomStrategy(Strategy):
     @classmethod
