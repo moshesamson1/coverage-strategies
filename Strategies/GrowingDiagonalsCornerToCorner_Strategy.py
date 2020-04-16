@@ -1,6 +1,5 @@
 from abc import abstractmethod
-
-from Entities import Slot, Strategy, Agent
+from coverage_strategies import Slot, Strategy, Agent
 
 
 class GrowingDiagonalsCornerToCorner_Strategy(Strategy):

@@ -1,15 +1,7 @@
-import smtplib
 from abc import ABCMeta
 from abc import abstractmethod
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from os.path import basename
-import smtplib
 from enum import Enum
-from os.path import basename
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 class Board:

@@ -1,4 +1,4 @@
-from Simulations_Thesis.Entities import Slot, Strategy, Agent
+from coverage_strategies.Entities import Slot, Strategy, Agent
 
 
 class LCP_Strategy(Strategy):

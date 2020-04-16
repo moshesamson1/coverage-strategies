@@ -1,5 +1,5 @@
-from Simulations_Thesis.Entities import Strategy, Slot
-from Simulations_Thesis import SpanningTreeCoverage
+from coverage_strategies.Entities import Strategy, Slot
+from coverage_strategies import SpanningTreeCoverage
 
 
 class STC_Strategy(Strategy):

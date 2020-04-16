@@ -1,4 +1,4 @@
-from Simulations_Thesis.Entities import Slot, Strategy
+from coverage_strategies.Entities import Slot, Strategy
 from abc import abstractmethod
 
 class VerticalNonCircularCoverage_Strategy(Strategy):

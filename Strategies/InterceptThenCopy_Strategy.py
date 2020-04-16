@@ -1,4 +1,4 @@
-from Simulations_Thesis.Entities import Strategy, Slot
+from coverage_strategies.Entities import Strategy, Slot
 from math import *
 import numpy as np
 
