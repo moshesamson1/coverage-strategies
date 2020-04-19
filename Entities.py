@@ -1,9 +1,9 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from enum import Enum
-
 import numpy as np
 
+# from coverage_strategies.StrategyGenerator import get_strategy_from_enum
 
 
 class Board:
@@ -125,7 +125,8 @@ class Agent:
         self.InitPosY = y
         self.gameBoard = board
 
-        self.Strategy = Strategy.get_strategy_from_enum(strategy_enum)
+        from coverage_strategies.StrategyGenerator import get_strategy_from_enum
+        self.Strategy = get_strategy_from_enum(strategy_enum)
         self.steps = self.Strategy.get_steps(self, len(board.Slots), agent_o)
 
     def get_tdv(self):
@@ -286,61 +287,3 @@ class Strategy:
         f_col = 0 if a.col > board_size / 2 else board_size - 1
         return Slot(f_row, f_col)
 
-
-    @classmethod
-    def get_strategy_from_enum(cls, strategy_enum: StrategyEnum):
-        from coverage_strategies.Strategies.TrulyRandom_Strategy import TrulyRandomStrategy
-        from coverage_strategies.Strategies.CircleInsideFromCornerFarthestFromIo_Strategy import \
-            CircleInsideFromCornerFarthestFromIo_Strategy
-        from coverage_strategies.Strategies.CircleOutsideFromBoardCenter_Strategy import \
-            CircleOutsideFromBoardCenter_Strategy
-        from coverage_strategies.Strategies.CircleOutsideFromCornerAdjacentToIo_Strategy import \
-            CircleOutsideFromCornerAdjacentToIo_Strategy
-        from coverage_strategies.Strategies.CircleOutsideFromCornerFarthestFromIo_Strategy import \
-            CircleOutsideFromCornerFarthestFromIo_Strategy
-        from coverage_strategies.Strategies.CircleOutsideFromIo_Strategy import CircleOutsideFromIo_Strategy
-        from coverage_strategies.Strategies.CoverByQuarters_Strategy import CoverByQuarters_Strategy
-        from coverage_strategies.Strategies.HorizontalCircularCoverage_Strategy import \
-            HorizontalCircularCoverage_Strategy
-        from coverage_strategies.Strategies.InterceptThenCopy_Strategy import InterceptThenCopy_Strategy
-        from coverage_strategies.Strategies.LCP_Strategy import LCP_Strategy
-        from coverage_strategies.Strategies.LongestToReach_Strategy import LongestToReach_Strategy
-        from coverage_strategies.Strategies.STC_Strategy import STC_Strategy
-        from coverage_strategies.Strategies.VerticalCircularCoverage_Strategy import VerticalCircularCoverage_Strategy
-        from coverage_strategies.Strategies.VerticalCoverageFromCornerFarthestFromIo_Strategy import \
-            VerticalCoverageFromCornerFarthestFromIo_Strategy
-        from coverage_strategies.Strategies.VerticalNonCircularCoverage_Strategy import \
-            VerticalNonCircularCoverage_Strategy
-
-        if strategy_enum == StrategyEnum.VerticalCoverageCircular:
-            return VerticalCircularCoverage_Strategy()
-        elif strategy_enum == StrategyEnum.HorizontalCoverageCircular:
-            return HorizontalCircularCoverage_Strategy()
-        elif strategy_enum == StrategyEnum.FullKnowledgeInterceptionCircular:
-            return InterceptThenCopy_Strategy()
-        elif strategy_enum == StrategyEnum.QuartersCoverageCircular:
-            return CoverByQuarters_Strategy()
-        elif strategy_enum == StrategyEnum.RandomSTC:
-            return STC_Strategy()
-        elif strategy_enum == StrategyEnum.VerticalCoverageNonCircular:
-            return VerticalNonCircularCoverage_Strategy()
-        elif strategy_enum == StrategyEnum.SpiralingIn:
-            return CircleInsideFromCornerFarthestFromIo_Strategy()
-        elif strategy_enum == StrategyEnum.SpiralingOut:
-            return CircleOutsideFromBoardCenter_Strategy()
-        elif strategy_enum == StrategyEnum.VerticalFromFarthestCorner_OpponentAware:
-            return VerticalCoverageFromCornerFarthestFromIo_Strategy()
-        elif strategy_enum == StrategyEnum.SemiCyclingFromFarthestCorner_OpponentAware:
-            return CircleOutsideFromCornerFarthestFromIo_Strategy()
-        elif strategy_enum == StrategyEnum.SemiCyclingFromAdjacentCorner_col_OpponentAware:
-            return CircleOutsideFromCornerAdjacentToIo_Strategy(False)
-        elif strategy_enum == StrategyEnum.SemiCyclingFromAdjacentCorner_row_OpponentAware:
-            return CircleOutsideFromCornerAdjacentToIo_Strategy(True)
-        elif strategy_enum == StrategyEnum.CircleOutsideFromIo:
-            return CircleOutsideFromIo_Strategy()
-        elif strategy_enum == StrategyEnum.LCP:
-            return LCP_Strategy()
-        elif strategy_enum == StrategyEnum.LONGEST_TO_REACH:
-            return LongestToReach_Strategy()
-        elif strategy_enum == StrategyEnum.TRULY_RANDOM:
-            return TrulyRandomStrategy()
