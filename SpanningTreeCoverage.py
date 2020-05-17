@@ -1,11 +1,6 @@
-from random import shuffle
+from random import shuffle, random
 from math import floor
 from coverage_strategies import Entities
-import random
-
-
-# import os
-
 
 def print_graph(edges, i_o, figure_label=""):
     print("Function is not available in this version!")
@@ -228,7 +223,7 @@ def create_covering_path(mst_edges_shallow_graph, initial_slot):
             break
 
     # flip path direction half of the time
-    if random.random() < 0.5:
+    if random() < 0.5:
         covering_path = flip_path(covering_path)
 
     return covering_path
