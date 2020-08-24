@@ -234,20 +234,29 @@ def flip_path(path):
     return_path.extend([path[i] for i in range(len(path)-1,0,-1)])
     return return_path
 
+def is_slot_shallow_obstacle(slot, obstacles):
+    return any([(int(slot.row / 2) == int(s.row / 2) and int(slot.col / 2) == int(s.col / 2)) for s in obstacles])
 
-def get_edges_for_full_graph(width, height):
-    edges = []
-    for row in range(height):
-        for col in range(width):
-            if row < height-1:
-                edges.append((Entities.Slot(row, col), Entities.Slot(row, col).go_south()))
-            if col < width-1:
-                edges.append((Entities.Slot(row, col), Entities.Slot(row, col).go_east()))
-    return edges
+def get_edges_for_full_graph(width, height, obstacles):
+    edges = [(Entities.Slot(row,col),Entities.Slot(row,col).go_south())
+             for row in range(height) for col in range(width)
+             if not (is_slot_shallow_obstacle(Entities.Slot(row,col),obstacles)
+             or is_slot_shallow_obstacle(Entities.Slot(row,col).go_south(), obstacles))
+             ]
+    edges.extend([(Entities.Slot(row, col), Entities.Slot(row, col).go_east())
+             for row in range(height) for col in range(width)
+             if not (is_slot_shallow_obstacle(Entities.Slot(row, col), obstacles)
+                 or is_slot_shallow_obstacle(Entities.Slot(row, col).go_east(), obstacles))
+             ])
+    inbounds = [e for e in edges if e[0].row < width and e[1].row < width and e[0].col < height and e[1].col < height ]
+    return inbounds
 
 
-def get_random_coverage_strategy(size, i_r, i_o=None, print_mst=False, figure_label=""):
-    edges = get_edges_for_full_graph(size, size)
+def get_random_coverage_strategy(size, i_r, i_o=None, print_mst=False, figure_label="", obstacles=[]):
+    edges = get_edges_for_full_graph(size, size, obstacles=obstacles)
+
+    # remove edges inside, or connected to, obstacles
+
     shallow_graph = get_shallow_graph(edges)
     shallow_init_pos = Entities.Slot(floor(i_r.row / 2.0), floor(i_r.col / 2.0))
     mst_edges_shallow_graph = mst(shallow_init_pos, shallow_graph)

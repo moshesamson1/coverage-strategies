@@ -11,6 +11,7 @@ class Board:
         self.Rows = rows
         self.Cols = cols
         self.Slots = [[Slot(y, x) for x in range(self.Rows)] for y in range(self.Cols)]
+        self.Obstacles = []
 
     def __str__(self):
         s = ''
@@ -26,6 +27,8 @@ class Board:
             s.is_occupied = False
             s.covered_by = "*"
 
+    def add_obstacles(self,obs=[]):
+        self.Obstacles.extend(obs)
 
 class Slot:
     def __init__(self, x, y):
