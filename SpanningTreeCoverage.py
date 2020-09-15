@@ -3,7 +3,8 @@ from math import floor
 from coverage_strategies import Entities
 
 def print_graph(edges, i_o, figure_label=""):
-    print("Function is not available in this version!")
+    pass
+    # print("Function is not available in this version!")
     # plt.figure()
     # g = nx.DiGraph()
     # g.add_edges_from(edges)

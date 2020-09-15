@@ -184,7 +184,7 @@ class Agent:
 
 class Game:
     def __init__(self, agent_r: Agent, agent_o: Agent, size=(100,100)) -> None:
-        self._board = Board(size[0], size[1])
+        self._board = agent_r.gameBoard
         self._agentR = agent_r
         self._agentO = agent_o
 
