@@ -1,7 +1,7 @@
 from distutils.core import setup
 from os import environ
 
-PACKAGE_VERSION = environ['PACKAGE_VERSION']
+PACKAGE_VERSION = environ.get('PACKAGE_VERSION')
 print('version is:' + PACKAGE_VERSION)
 
 setup(
