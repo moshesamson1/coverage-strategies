@@ -4,7 +4,7 @@ from os import environ
 PACKAGE_VERSION = environ.get('PACKAGE_VERSION')
 print('version is:' + str(PACKAGE_VERSION))
 
-PACKGE_VERSION = 'v0.9.13'
+PACKGE_VERSION = '0.9.14'
 
 setup(
   name = 'coverage_strategies',         # How you named your package folder (MyLib)
@@ -15,7 +15,7 @@ setup(
   author = 'Samson Moshe',                   # Type in your name
   author_email = 'samson.moshe@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/moshesamson1',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/moshesamson1/coverage_strategies/archive/' + str(PACKAGE_VERSION) + 'git.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/moshesamson1/coverage_strategies/archive/v' + PACKAGE_VERSION + 'git.tar.gz',    # I explain this later on
   keywords = ['COVERAGE', 'PATHS', 'SIMULATIONS'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'numpy'
