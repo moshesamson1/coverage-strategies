@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'coverage_strategies',         # How you named your package folder (MyLib)
   packages = ['src'],   # Chose the same as "name"
-  version = '0.8',      # Start with a small number and increase it with every change you make
+  version = '0.9',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Provide different coverage strategies, and means to check and validate them',
   author = 'Samson Moshe',                   # Type in your name
