@@ -1,21 +1,19 @@
 from distutils.core import setup
 from os import environ
 
-PACKAGE_VERSION = environ.get('PACKAGE_VERSION')
-print('version is:' + str(PACKAGE_VERSION))
-
-PACKGE_VERSION = '0.9.14'
+#PACKAGE_VERSION = environ.get('PACKAGE_VERSION')
+#print('version is:' + str(PACKAGE_VERSION))
 
 setup(
   name = 'coverage_strategies',         # How you named your package folder (MyLib)
   packages = ['src'],   # Chose the same as "name"
-  version = PACKAGE_VERSION,      # Start with a small number and increase it with every change you make
+  version = '0.9.15',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Provide different coverage strategies, and means to check and validate them',
   author = 'Samson Moshe',                   # Type in your name
   author_email = 'samson.moshe@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/moshesamson1',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/moshesamson1/coverage_strategies/archive/v' + PACKAGE_VERSION + 'git.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/moshesamson1/coverage_strategies/archive/v' + '0.9.15' + 'git.tar.gz',    # I explain this later on
   keywords = ['COVERAGE', 'PATHS', 'SIMULATIONS'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
           'numpy'
