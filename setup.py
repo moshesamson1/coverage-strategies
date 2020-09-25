@@ -2,7 +2,7 @@ from distutils.core import setup
 from os import environ
 
 PACKAGE_VERSION = environ.get('PACKAGE_VERSION')
-print('version is:' + PACKAGE_VERSION)
+print('version is:' + str(PACKAGE_VERSION))
 
 setup(
   name = 'coverage_strategies',         # How you named your package folder (MyLib)
