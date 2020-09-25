@@ -1,6 +1,7 @@
 from random import shuffle, random
 from math import floor
-from coverage_strategies import Entities
+from coverage_strategies.src import Entities
+
 
 def print_graph(edges, i_o, figure_label=""):
     pass
@@ -239,15 +240,15 @@ def is_slot_shallow_obstacle(slot, obstacles):
     return any([(int(slot.row / 2) == int(s.row / 2) and int(slot.col / 2) == int(s.col / 2)) for s in obstacles])
 
 def get_edges_for_full_graph(width, height, obstacles):
-    edges = [(Entities.Slot(row,col),Entities.Slot(row,col).go_south())
+    edges = [(Entities.Slot(row, col), Entities.Slot(row, col).go_south())
              for row in range(height) for col in range(width)
-             if not (is_slot_shallow_obstacle(Entities.Slot(row,col),obstacles)
-             or is_slot_shallow_obstacle(Entities.Slot(row,col).go_south(), obstacles))
+             if not (is_slot_shallow_obstacle(Entities.Slot(row, col), obstacles)
+                     or is_slot_shallow_obstacle(Entities.Slot(row, col).go_south(), obstacles))
              ]
     edges.extend([(Entities.Slot(row, col), Entities.Slot(row, col).go_east())
              for row in range(height) for col in range(width)
              if not (is_slot_shallow_obstacle(Entities.Slot(row, col), obstacles)
-                 or is_slot_shallow_obstacle(Entities.Slot(row, col).go_east(), obstacles))
+                     or is_slot_shallow_obstacle(Entities.Slot(row, col).go_east(), obstacles))
              ])
     inbounds = [e for e in edges if e[0].row < width and e[1].row < width and e[0].col < height and e[1].col < height ]
     return inbounds

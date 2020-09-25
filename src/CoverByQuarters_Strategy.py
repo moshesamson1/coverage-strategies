@@ -1,4 +1,4 @@
-from coverage_strategies.Entities import Slot, Strategy
+from coverage_strategies.src.Entities import Slot, Strategy
 from abc import abstractmethod
 
 class CoverByQuarters_Strategy(Strategy):
