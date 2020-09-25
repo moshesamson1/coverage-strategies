@@ -4,6 +4,8 @@ from os import environ
 PACKAGE_VERSION = environ.get('PACKAGE_VERSION')
 print('version is:' + str(PACKAGE_VERSION))
 
+PACKGE_VERSION = 'v0.9.13'
+
 setup(
   name = 'coverage_strategies',         # How you named your package folder (MyLib)
   packages = ['src'],   # Chose the same as "name"
