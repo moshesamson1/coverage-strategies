@@ -1,5 +1,5 @@
-from coverage_strategies.src.Entities import Strategy, Slot, Board, Agent
-from coverage_strategies.src.SpanningTreeCoverage import is_slot_shallow_obstacle
+from coverage_strategies.coverage_strategies.Entities import Strategy, Slot, Board, Agent
+from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
 
 
 def get_graph_from_board(b:Board):

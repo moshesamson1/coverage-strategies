@@ -1,15 +1,14 @@
-from coverage_strategies.src.Entities import Slot, Strategy
+from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent
 
 
-class LongestToReach_Strategy(Strategy):
-    def get_steps(self, agent_r, board_size = 50, agent_o = None):
+class LCP_Strategy(Strategy):
+    def get_steps(self, agent_r: Agent, board_size = 50, agent_o: Agent = None):
         assert agent_o is not None
+
 
         # go to the farthest corner
         self.steps.extend(Strategy.go_from_a_to_b(a=Slot(agent_r.InitPosX, agent_r.InitPosY),
-                                                  b=Strategy.get_farthest_corner(
-                                                      a=Slot(agent_o.InitPosX, agent_o.InitPosY),
-                                                      board_size=32)))
+                                                  b=Slot(agent_o.InitPosX, agent_o.InitPosY)))
 
         # from there, cover semi-cyclic
         current_slot = self.steps[-1]

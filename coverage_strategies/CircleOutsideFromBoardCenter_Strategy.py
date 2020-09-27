@@ -1,4 +1,4 @@
-from coverage_strategies.src.Entities import Strategy, Slot
+from coverage_strategies.coverage_strategies.Entities import Strategy, Slot
 
 
 class CircleOutsideFromBoardCenter_Strategy(Strategy):

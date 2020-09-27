@@ -128,7 +128,7 @@ class Agent:
         self.InitPosY = y
         self.gameBoard = board
 
-        from coverage_strategies.src.StrategyGenerator import get_strategy_from_enum
+        from coverage_strategies.coverage_strategies.StrategyGenerator import get_strategy_from_enum
         self.Strategy = get_strategy_from_enum(strategy_enum)
         self.steps = self.Strategy.get_steps(self, len(board.Slots), agent_o)
 
