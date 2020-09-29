@@ -4,8 +4,7 @@
 name: Upload Python Package
 
 on:
-  release:
-    types: [created]
+  release
   
 jobs:
   deploy:
@@ -27,6 +26,5 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERS }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        export PACKAGE_VERSION=$(git describe --tags)
         python setup.py sdist
         twine upload dist/* --verbose
