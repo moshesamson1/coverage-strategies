@@ -59,6 +59,9 @@ class Slot:
     def go_south(self):
         return Slot(self.row + 1, self.col)
 
+    def in_bounds(self, board:Board):
+        return 0 <= self.row < board.Rows and 0 <= self.col < board.Cols
+
     def go(self, s, opposite_direction = False):
         """
         Go South, East, North or West, according to the given parameter.
