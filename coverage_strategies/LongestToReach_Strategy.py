@@ -15,17 +15,10 @@ class LongestToReach_Strategy(Strategy):
         board = agent_o.gameBoard
 
         # Mark all the vertices as not visited
-        visited = {}
-        [visited.setdefault(i,False) for j in board.Slots for i in j]
-        # visited = [False] * (len(board.Slots)*len(board.Slots[0]))
-
-        slotLEVELdict = {}
-        [slotLEVELdict.setdefault(i,-1) for j in board.Slots for i in j]
-
+        visited = {i:False for j in board.Slots for i in j}
         queue = []
-        LEVEL = 0
         initial_slot = Slot(agent_o.InitPosX, agent_o.InitPosY)
-        queue.append((initial_slot,LEVEL))
+        queue.append((initial_slot,0))
         visited[initial_slot] = True
         while queue:
             s,l = queue.pop(0)
@@ -34,12 +27,13 @@ class LongestToReach_Strategy(Strategy):
             # Get all adjacent vertices of the
             # dequeued vertex s. If a adjacent
             # has not been visited, then mark it
-            # visited and enqueue it
-
+            # visited and enqueue it.
+            # all unvisited neighbors get level value of +1 of the current level value
             for i in [i for i in [s.go_south(), s.go_east(), s.go_west(), s.go_north()] if i.in_bounds(board)]:
                 if not visited[i]:
                     queue.append((i,l+1))
                     visited[i] = True
+
 
 
         #
