@@ -20,6 +20,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      - name: Read CHANGELOG
+        id: changelog
+        run: |
+          echo "::set-output name=body::$(git log $(git tag --sort=-creatordate | head -n 2 | tail -n 1)..$(git tag --sort=-creatordate | head -n 1) --oneline)"
+
       - name: Create a Release
         uses: actions/create-release@v1.1.4
         env:
@@ -30,7 +35,7 @@ jobs:
           # The name of the release. For example, `Release v1.0.1`
           release_name: Release ${{github.ref}}
           # Text describing the contents of the tag.
-          body: $(git log $(git tag --sort=-creatordate | head -n 2 | tail -n 1)..$(git tag --sort=-creatordate | head -n 1) --oneline)
+          body: ${{ steps.changelog.outputs.body }}
           # Path to file with information about the tag.
           body_path: ''# optional
           # `true` to create a draft (unpublished) release, `false` to create a published one. Default: `false`
