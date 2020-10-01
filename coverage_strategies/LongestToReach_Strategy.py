@@ -1,7 +1,35 @@
-from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent
+import operator
+
+from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent, Board
+
+
+def assign_level_to_slots(board:Board, init:Slot):
+    leveled_vertices = {}
+
+    # Mark all the vertices as not visited
+    visited = {i: False for j in board.Slots for i in j}
+    queue = []
+    queue.append((init, 0))
+    visited[init] = True
+    while queue:
+        s, l = queue.pop(0)
+        leveled_vertices[s] = l
+
+        # Get all adjacent vertices of the
+        # dequeued vertex s. If a adjacent
+        # has not been visited, then mark it
+        # visited and enqueue it.
+        # all unvisited neighbors get level value of +1 of the current level value
+        for i in [i for i in [s.go_south(), s.go_east(), s.go_west(), s.go_north()] if i.in_bounds(board)]:
+            if not visited[i]:
+                queue.append((i, l + 1))
+                visited[i] = True
+
+    return leveled_vertices
+
 
 class LongestToReach_Strategy(Strategy):
-    def get_steps(self, agent_r, board_size = 50, agent_o:Agent = None):
+    def get_steps(self, agent_r:Agent, board_size = 50, agent_o:Agent = None):
         assert agent_o is not None
 
         # 1. perform bfs and set LEVEL values
@@ -11,30 +39,17 @@ class LongestToReach_Strategy(Strategy):
         #   3.2. if next level adjacent, go there
         #   3.3  if not all cells are covered, go to next level (search)
 
-        # perform bfs
+        # 1. perform bfs
         board = agent_o.gameBoard
+        leveled_slots = assign_level_to_slots(board, Slot(agent_o.InitPosX, agent_o.InitPosY))
 
-        # Mark all the vertices as not visited
-        visited = {i:False for j in board.Slots for i in j}
-        queue = []
-        initial_slot = Slot(agent_o.InitPosX, agent_o.InitPosY)
-        queue.append((initial_slot,0))
-        visited[initial_slot] = True
-        while queue:
-            s,l = queue.pop(0)
-            print(s,l, end=' ')
-
-            # Get all adjacent vertices of the
-            # dequeued vertex s. If a adjacent
-            # has not been visited, then mark it
-            # visited and enqueue it.
-            # all unvisited neighbors get level value of +1 of the current level value
-            for i in [i for i in [s.go_south(), s.go_east(), s.go_west(), s.go_north()] if i.in_bounds(board)]:
-                if not visited[i]:
-                    queue.append((i,l+1))
-                    visited[i] = True
-
-
+        # 2. go to cell with highest LEVEL value
+        max_level_slot = max(leveled_slots.items(), key=operator.itemgetter(1))[0]
+        self.steps.extend(Strategy.go_from_a_to_b(
+            a=Slot(agent_r.InitPosX, agent_r.InitPosY),
+            b=max_level_slot)
+        )
+        print(1)
 
         #
         # # go to the farthest corner
