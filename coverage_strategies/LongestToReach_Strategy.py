@@ -8,8 +8,7 @@ def assign_level_to_slots(board:Board, init:Slot):
 
     # Mark all the vertices as not visited
     visited = {i: False for j in board.Slots for i in j}
-    queue = []
-    queue.append((init, 0))
+    queue = [(init, 0)]
     visited[init] = True
     while queue:
         s, l = queue.pop(0)
@@ -20,12 +19,37 @@ def assign_level_to_slots(board:Board, init:Slot):
         # has not been visited, then mark it
         # visited and enqueue it.
         # all unvisited neighbors get level value of +1 of the current level value
-        for i in [i for i in [s.go_south(), s.go_east(), s.go_west(), s.go_north()] if i.in_bounds(board)]:
+        for i in [i for i in s.get_inbound_neighbors(board)]:
             if not visited[i]:
                 queue.append((i, l + 1))
                 visited[i] = True
 
     return leveled_vertices
+
+
+def cover_current_level(level, current:Slot, board:Board, leveled_slots):
+    slots = [current]
+    current_slot = current
+    level_amount = len([i for i in leveled_slots.values() if i==level])
+
+    leveled_neighbors = lambda slot: [i for i in current_slot.get_8_inbound_neighbors(board) if leveled_slots[i] == level]
+    nonpresent_leveled_neighbors = lambda slot,l: [i for i in leveled_neighbors(slot) if i not in l]
+
+    # go toward a neighbor of the same level, covering until having a single neighbor with level value
+    uncovered_inbound_neighbors = nonpresent_leveled_neighbors(current_slot, slots)
+    while uncovered_inbound_neighbors:
+        current_slot = uncovered_inbound_neighbors.pop()
+        slots.append(current_slot)
+        uncovered_inbound_neighbors = nonpresent_leveled_neighbors(current_slot, slots)
+
+    # if not covered all of this level, go the the opposite direction and cover until all level is covered
+    doubly_covered_slots = []
+    while len(set(slots)) < level_amount:
+        current_slot = nonpresent_leveled_neighbors(current_slot, doubly_covered_slots)[0]
+        doubly_covered_slots.append(current_slot)
+        slots.append(current_slot)
+
+    return slots[1:]
 
 
 class LongestToReach_Strategy(Strategy):
@@ -39,81 +63,39 @@ class LongestToReach_Strategy(Strategy):
         #   3.2. if next level adjacent, go there
         #   3.3  if not all cells are covered, go to next level (search)
 
+        covered_slots = []
+
         # 1. perform bfs
         board = agent_o.gameBoard
         leveled_slots = assign_level_to_slots(board, Slot(agent_o.InitPosX, agent_o.InitPosY))
 
         # 2. go to cell with highest LEVEL value
-        max_level_slot = max(leveled_slots.items(), key=operator.itemgetter(1))[0]
-        self.steps.extend(Strategy.go_from_a_to_b(
+        max_level_slot = max(leveled_slots.items(), key=operator.itemgetter(1))
+        path_to_max_slot = Strategy.go_from_a_to_b(
             a=Slot(agent_r.InitPosX, agent_r.InitPosY),
-            b=max_level_slot)
-        )
-        print(1)
+            b=max_level_slot[0])
+        self.steps.extend(path_to_max_slot)
+        current_slot = max_level_slot[0]
+        covered_slots.extend(path_to_max_slot)
 
-        #
-        # # go to the farthest corner
-        # self.steps.extend(Strategy.go_from_a_to_b(a=Slot(agent_r.InitPosX, agent_r.InitPosY),
-        #                                           b=Strategy.get_farthest_corner(
-        #                                               a=Slot(agent_o.InitPosX, agent_o.InitPosY),
-        #                                               board_size=32)))
-        #
-        # # from there, cover semi-cyclic
-        # current_slot = self.steps[-1]
-        # v_dir = 'u' if current_slot.row == board_size - 1 else 'd'
-        # h_dir = 'r' if current_slot.col == board_size - 1 else 'l'
-        # start_vertical = True
-        # distance = 1
-        # counter = 1
-        #
-        # # initial horizontal step
-        # current_slot = current_slot.go_west() if h_dir == 'r' else current_slot.go_east()
-        # self.steps.append(current_slot)
-        # counter += 1
-        #
-        # while counter <= board_size * board_size and distance < board_size:
-        #     if start_vertical:
-        #         # going vertically
-        #         for _ in range(distance):
-        #             current_slot = current_slot.go_north() if v_dir == 'u' else current_slot.go_south()
-        #             self.steps.append(current_slot)
-        #             counter += 1
-        #
-        #         # going horizontally
-        #         for _ in range(distance):
-        #             current_slot = current_slot.go_west() if h_dir == 'l' else current_slot.go_east()
-        #             self.steps.append(current_slot)
-        #             counter += 1
-        #
-        #         # final vertical step
-        #         if counter < board_size * board_size:
-        #             current_slot = current_slot.go_north() if v_dir == 'u' else current_slot.go_south()
-        #             self.steps.append(current_slot)
-        #             counter += 1
-        #
-        #     else:
-        #         # going horizontally
-        #         for _ in range(distance):
-        #             current_slot = current_slot.go_west() if h_dir == 'l' else current_slot.go_east()
-        #             self.steps.append(current_slot)
-        #             counter += 1
-        #
-        #         # going vertically
-        #         for _ in range(distance):
-        #             current_slot = current_slot.go_north() if v_dir == 'u' else current_slot.go_south()
-        #             self.steps.append(current_slot)
-        #             counter += 1
-        #
-        #         # final horizontal step
-        #         if counter < board_size * board_size:
-        #             current_slot = current_slot.go_west() if h_dir == 'l' else current_slot.go_east()
-        #             self.steps.append(current_slot)
-        #             counter += 1
-        #
-        #     start_vertical = not start_vertical
-        #     h_dir = 'r' if h_dir == 'l' else 'l'
-        #     v_dir = 'u' if v_dir == 'd' else 'd'
-        #
-        #     distance += 1
-        #
+        # 3. while not all cells covered:
+        while len(set(covered_slots)) < board.Rows*board.Cols:
+            #   3.1. cover current LEVEL
+            level_steps = cover_current_level(level=leveled_slots[current_slot],current=current_slot, board=board, leveled_slots=leveled_slots)
+            self.steps.extend(level_steps)
+            covered_slots.extend(level_steps)
+
+            if level_steps:
+                current_slot = level_steps[-1]
+
+            #   3.2. if next level adjacent, go there
+            for n in current_slot.get_inbound_neighbors(board):
+                if n not in covered_slots and leveled_slots[n] == leveled_slots[current_slot]-1:
+                    current_slot = n
+                    covered_slots.append(current_slot)
+                    self.steps.append(current_slot)
+                    break
+
+            #   3.3  if next level not adjacent, and process not finished, search for next level (higher than 0) and go there
+
         return self.steps
