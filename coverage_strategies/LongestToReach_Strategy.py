@@ -76,10 +76,11 @@ class LongestToReach_Strategy(Strategy):
             b=max_level_slot[0])
         self.steps.extend(path_to_max_slot)
         current_slot = max_level_slot[0]
-        covered_slots.extend(path_to_max_slot)
+        covered_slots.append(current_slot)
+        # covered_slots.extend(path_to_max_slot)
 
         # 3. while not all cells covered:
-        while len(set(covered_slots)) < board.Rows*board.Cols:
+        while len(set(self.steps)) < board.Rows*board.Cols:
             #   3.1. cover current LEVEL
             level_steps = cover_current_level(level=leveled_slots[current_slot],current=current_slot, board=board, leveled_slots=leveled_slots)
             self.steps.extend(level_steps)
@@ -88,14 +89,23 @@ class LongestToReach_Strategy(Strategy):
             if level_steps:
                 current_slot = level_steps[-1]
 
-            #   3.2. if next level adjacent, go there
-            for n in current_slot.get_inbound_neighbors(board):
-                if n not in covered_slots and leveled_slots[n] == leveled_slots[current_slot]-1:
-                    current_slot = n
-                    covered_slots.append(current_slot)
-                    self.steps.append(current_slot)
-                    break
+            can_repeat = lambda x:x
 
+            #   3.2. if next level adjacent, go there
+            preferred_n = Slot(-1,-1)
+            for n in current_slot.get_inbound_neighbors(board):
+
+                if n not in covered_slots and leveled_slots[n] == leveled_slots[current_slot]-1:
+                    if preferred_n == Slot(-1,-1) or len(n.get_inbound_neighbors(board)) < len(preferred_n.get_inbound_neighbors(board)):
+                        preferred_n = n
+
+            if preferred_n is not Slot(-1,-1):
+                current_slot = preferred_n
+                covered_slots.append(current_slot)
+                self.steps.append(current_slot)
+                # break
+            else:
+                pass
             #   3.3  if next level not adjacent, and process not finished, search for next level (higher than 0) and go there
 
         return self.steps
