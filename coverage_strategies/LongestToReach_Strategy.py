@@ -102,23 +102,25 @@ class LongestToReach_Strategy(Strategy):
             if level_steps:
                 current_slot = level_steps[-1]
 
-            can_repeat = lambda x:x
-
             #   3.2. if next level adjacent, go there
             preferred_n = Slot(-1,-1)
-            for n in current_slot.get_inbound_neighbors(board):
+            current_slot_neighbors = current_slot.get_inbound_neighbors(board)
 
-                if n not in covered_slots and leveled_slots[n] == leveled_slots[current_slot]-1:
-                    if preferred_n == Slot(-1,-1) or len(n.get_inbound_neighbors(board)) < len(preferred_n.get_inbound_neighbors(board)):
-                        preferred_n = n
+            if any([(leveled_slots[i] == leveled_slots[current_slot]-1) for i in current_slot_neighbors]):
+                for n in current_slot_neighbors:
+                    if n not in covered_slots and leveled_slots[n] == leveled_slots[current_slot]-1:
+                        if preferred_n == Slot(-1,-1) or len(n.get_inbound_neighbors(board)) < len(preferred_n.get_inbound_neighbors(board)):
+                            preferred_n = n
 
-            if preferred_n is not Slot(-1,-1):
-                current_slot = preferred_n
-                covered_slots.append(current_slot)
-                self.steps.append(current_slot)
-                # break
+                if preferred_n != Slot(-1,-1):
+                    if preferred_n.row == -1:
+                        pass
+                    current_slot = preferred_n
+                    current_slot_neighbors = current_slot.get_inbound_neighbors(board)
+                    covered_slots.append(current_slot)
+                    self.steps.append(current_slot)
+                    # break
             else:
+                #   3.3  if next level not adjacent, and process not finished, search for next level (higher than 0) and go there
                 pass
-            #   3.3  if next level not adjacent, and process not finished, search for next level (higher than 0) and go there
-
         return self.steps
