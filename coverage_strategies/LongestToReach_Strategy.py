@@ -45,7 +45,11 @@ def cover_current_level(level, current:Slot, board:Board, leveled_slots):
     # if not covered all of this level, go the the opposite direction and cover until all level is covered
     doubly_covered_slots = []
     while len(set(slots)) < level_amount:
-        current_slot = nonpresent_leveled_neighbors(current_slot, doubly_covered_slots)[0]
+        uncovered_leveled_slots = nonpresent_leveled_neighbors(current_slot, doubly_covered_slots)
+        if not uncovered_leveled_slots:
+            break
+
+        current_slot = uncovered_leveled_slots[0]
         doubly_covered_slots.append(current_slot)
         slots.append(current_slot)
 
