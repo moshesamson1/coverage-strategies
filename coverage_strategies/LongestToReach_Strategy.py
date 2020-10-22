@@ -19,7 +19,7 @@ def assign_level_to_slots(board:Board, init:Slot):
         # has not been visited, then mark it
         # visited and enqueue it.
         # all unvisited neighbors get level value of +1 of the current level value
-        for i in [i for i in s.get_inbound_neighbors(board)]:
+        for i in [i for i in s.get_8_inbound_neighbors(board)]:
             if not visited[i]:
                 queue.append((i, l + 1))
                 visited[i] = True
@@ -32,7 +32,7 @@ def cover_current_level(level, current:Slot, board:Board, leveled_slots):
     current_slot = current
     level_amount = len([i for i in leveled_slots.values() if i==level])
 
-    leveled_neighbors = lambda slot: [i for i in current_slot.get_8_inbound_neighbors(board) if leveled_slots[i] == level]
+    leveled_neighbors = lambda slot: [i for i in current_slot.get_inbound_neighbors(board) if leveled_slots[i] == level]
     nonpresent_leveled_neighbors = lambda slot,l: [i for i in leveled_neighbors(slot) if i not in l]
 
     # go toward a neighbor of the same level, covering until having a single neighbor with level value
