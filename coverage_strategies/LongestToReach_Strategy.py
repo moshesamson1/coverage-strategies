@@ -1,5 +1,5 @@
 import operator
-
+from math import fabs
 from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent, Board
 
 
@@ -68,14 +68,23 @@ class LongestToReach_Strategy(Strategy):
         # 1. perform bfs
         board = agent_o.gameBoard
         leveled_slots = assign_level_to_slots(board, Slot(agent_o.InitPosX, agent_o.InitPosY))
+        #
+        distance = lambda a,b: fabs(a.row-b.row)+fabs(a.col-b.col)
+        edges_and_distance_score = lambda slot: len(slot.get_inbound_neighbors(board))*10 + distance(slot,Slot(agent_r.InitPosX, agent_r.InitPosY))
+        # s = sorted(leveled_slots.items(), key=edges_and_distance_score)
+
+        max_level = max(leveled_slots.values())
+        max_leveled_slots = [i for i in leveled_slots if leveled_slots[i]==max_level]
+        ordered_max_leveled_slots = sorted(max_leveled_slots, key=edges_and_distance_score)
 
         # 2. go to cell with highest LEVEL value
-        max_level_slot = max(leveled_slots.items(), key=operator.itemgetter(1))
+        # max_level_slot = max(leveled_slots.items(), key=operator.itemgetter(1))
+        best_max_level_slot = ordered_max_leveled_slots[0]
         path_to_max_slot = Strategy.go_from_a_to_b(
             a=Slot(agent_r.InitPosX, agent_r.InitPosY),
-            b=max_level_slot[0])
+            b=best_max_level_slot)
         self.steps.extend(path_to_max_slot)
-        current_slot = max_level_slot[0]
+        current_slot = best_max_level_slot
         covered_slots.append(current_slot)
         # covered_slots.extend(path_to_max_slot)
 
