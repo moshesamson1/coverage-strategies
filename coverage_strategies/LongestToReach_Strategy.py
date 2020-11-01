@@ -44,12 +44,18 @@ def cover_current_level(level, current:Slot, board:Board, leveled_slots):
 
     # if not covered all of this level, go the the opposite direction and cover until all level is covered
     doubly_covered_slots = []
+    # if reached to this point, go until there is a cell with uncovered neighbor, and from there cover until done.
+    # if len(set(slots)) < level_amount:
+        # go until at a cell with uncovered neighbor
+    previous_slot = Slot(-1,-1)
     while len(set(slots)) < level_amount:
         uncovered_leveled_slots = nonpresent_leveled_neighbors(current_slot, doubly_covered_slots)
         if not uncovered_leveled_slots:
             break
 
-        current_slot = uncovered_leveled_slots[0]
+        temp = current_slot
+        current_slot = [i for i in uncovered_leveled_slots if i != previous_slot][0]
+        previous_slot = temp
         doubly_covered_slots.append(current_slot)
         slots.append(current_slot)
 
@@ -75,7 +81,6 @@ class LongestToReach_Strategy(Strategy):
         #
         distance = lambda a,b: fabs(a.row-b.row)+fabs(a.col-b.col)
         edges_and_distance_score = lambda slot: len(slot.get_inbound_neighbors(board))*10 + distance(slot,Slot(agent_r.InitPosX, agent_r.InitPosY))
-        # s = sorted(leveled_slots.items(), key=edges_and_distance_score)
 
         max_level = max(leveled_slots.values())
         max_leveled_slots = [i for i in leveled_slots if leveled_slots[i]==max_level]
@@ -116,11 +121,14 @@ class LongestToReach_Strategy(Strategy):
                     if preferred_n.row == -1:
                         pass
                     current_slot = preferred_n
-                    current_slot_neighbors = current_slot.get_inbound_neighbors(board)
                     covered_slots.append(current_slot)
                     self.steps.append(current_slot)
                     # break
             else:
+                print(current_slot)
+                print([i for i in leveled_slots.keys() if i not in self.steps])
+                raise Exception("Unhandled Code!")
                 #   3.3  if next level not adjacent, and process not finished, search for next level (higher than 0) and go there
+                #   3.4 from there, cover with increasing level values until no more slots are to cover
                 pass
         return self.steps
