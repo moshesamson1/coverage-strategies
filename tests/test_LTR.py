@@ -8,7 +8,9 @@ def run_game(pos_r:Slot, pos_o:Slot, w=32, h=32):
     rg, _ = g.run_game()
 
 
-def test_positions():
-    run_game(Slot(0,0), Slot(1,1))
+def test_positions(positions):
+    ir=Slot(positions[0][0], positions[0][1])
+    io=Slot(positions[1][0], positions[1][1])
+    run_game(ir, io)
 
 
