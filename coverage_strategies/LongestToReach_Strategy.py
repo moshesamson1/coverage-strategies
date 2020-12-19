@@ -3,7 +3,7 @@ from math import fabs
 from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent, Board
 
 
-def assign_level_to_slots(board:Board, init:Slot):
+def assign_level_to_slots(board:Board, init:Slot, levelType:int=8):
     leveled_vertices = {}
 
     # Mark all the vertices as not visited
@@ -19,7 +19,10 @@ def assign_level_to_slots(board:Board, init:Slot):
         # has not been visited, then mark it
         # visited and enqueue it.
         # all unvisited neighbors get level value of +1 of the current level value
-        for i in [i for i in s.get_8_inbound_neighbors(board)]:
+
+        neighbors = s.get_inbound_neighbors(board) if levelType == 4 else s.get_8_inbound_neighbors(board)
+
+        for i in [i for i in neighbors]:
             if not visited[i]:
                 queue.append((i, l + 1))
                 visited[i] = True
@@ -75,9 +78,15 @@ class LongestToReach_Strategy(Strategy):
 
         covered_slots = []
 
+        # get the 'farthest' cell from R's initial location
+        initial_level_assignment = assign_level_to_slots(board=agent_o.gameBoard,
+                                                         init=Slot(agent_o.InitPosX,agent_o.InitPosY),
+                                                         levelType=4)
+        farthest_slot = max(initial_level_assignment.items(), key=operator.itemgetter(1))[0]
+
         # 1. perform bfs
         board = agent_o.gameBoard
-        leveled_slots = assign_level_to_slots(board, Slot(31,31))
+        leveled_slots = assign_level_to_slots(board, farthest_slot)
 
         # define lambda
         there_are_cells_to_cover = lambda : len(set(self.steps)) < board.Rows*board.Cols
@@ -102,7 +111,11 @@ class LongestToReach_Strategy(Strategy):
         # 3. while not all cells covered:
         while there_are_cells_to_cover():
             #   3.1. cover current LEVEL
-            level_steps = cover_current_level(level=leveled_slots[current_slot],current=current_slot, board=board, leveled_slots=leveled_slots)
+            level_steps = cover_current_level(
+                level=leveled_slots[current_slot],
+                current=current_slot,
+                board=board,
+                leveled_slots=leveled_slots)
             self.steps.extend(level_steps)
             covered_slots.extend(level_steps)
 
