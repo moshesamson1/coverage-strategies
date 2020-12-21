@@ -100,9 +100,11 @@ class LongestToReach_Strategy(Strategy):
         # 2. go to cell with highest LEVEL value
         # max_level_slot = max(leveled_slots.items(), key=operator.itemgetter(1))
         best_max_level_slot = ordered_max_leveled_slots[0]
-        path_to_max_slot = Strategy.go_from_a_to_b(
+        #todo: go from A to B should be done using the Dijkstra algorithm, should link to the relevant github issue
+        path_to_max_slot = Strategy.go_from_a_to_b_dijkstra(
             a=Slot(agent_r.InitPosX, agent_r.InitPosY),
-            b=best_max_level_slot)
+            b=best_max_level_slot,
+            board=board)
         self.steps.extend(path_to_max_slot)
         current_slot = best_max_level_slot
         covered_slots.append(current_slot)

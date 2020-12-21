@@ -4,6 +4,7 @@ from enum import Enum
 import numpy as np
 
 # from coverage_strategies.StrategyGenerator import get_strategy_from_enum
+from coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
 
 
 class Board:
@@ -276,6 +277,18 @@ class Strategy:
             steps_to_return.append(current_step)
 
         return steps_to_return
+
+    @classmethod
+    def go_from_a_to_b_dijkstra(self, a, b, board):
+        g = get_graph_from_board(board)
+        dijkstra(g,g.get_vertex(a), g.get_vertex(b))
+
+        target = g.get_vertex(b)
+        path = [target.get_id()]
+        shortest(target, path)
+
+        return path[::-1]
+
 
     @classmethod
     def get_farthest_corner(self, a, board_size):
