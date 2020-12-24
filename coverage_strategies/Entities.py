@@ -3,8 +3,8 @@ from abc import abstractmethod
 from enum import Enum
 import numpy as np
 
-# from coverage_strategies.StrategyGenerator import get_strategy_from_enum
 from coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
+from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
 
 
 class Board:
@@ -215,12 +215,21 @@ class Game:
 
         for i in range(self._board.Rows):
             for j in range(self._board.Cols):
-                ri = steps_r.index(Slot(i,j))
-                oi = steps_o.index(Slot(i,j))
+                curr_slot = Slot(i,j)
+
+                if is_slot_shallow_obstacle(curr_slot, self._agentO.gameBoard.Obstacles):
+                    # print("slot %s is a shallow obstacle! " % curr_slot)
+                    continue
+
+                ri = steps_r.index(curr_slot)
+                oi = steps_o.index(curr_slot)
                 self._board.Slots[i][j].has_been_visited = True
                 self._board.Slots[i][j].covered_by = self._agentO.Name if oi < ri else self._agentR.Name
 
-        assert all([(True if self._board.Slots[i][j].has_been_visited else False) for i in range(self._board.Rows) for j in range(self._board.Cols)])
+        # make sure all cells, which are not obstacles, are covered
+        assert all([(True if self._board.Slots[i][j].has_been_visited else False)
+                    for i in range(self._board.Rows) for j in range(self._board.Cols)
+                    if not is_slot_shallow_obstacle(Slot(i,j), self.board.Obstacles)])
         return self.get_r_gain(), self.get_o_gain()
 
     def get_r_gain(self):
@@ -242,7 +251,7 @@ class Game:
 
 class Strategy:
     __metaclass__ = ABCMeta
-    steps = [] # type: List[Slot]
+    steps = [] # type: list[Slot]
 
     def __init__(self):
         self.steps = []
@@ -301,4 +310,3 @@ class Strategy:
         f_row = 0 if a.row > board_size / 2 else board_size - 1
         f_col = 0 if a.col > board_size / 2 else board_size - 1
         return Slot(f_row, f_col)
-
