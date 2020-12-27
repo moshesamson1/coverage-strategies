@@ -215,7 +215,7 @@ class Game:
 
         for i in range(self._board.Rows):
             for j in range(self._board.Cols):
-                curr_slot = Slot(i,j)
+                curr_slot = self._board.Slots[i][j]
 
                 if is_slot_shallow_obstacle(curr_slot, self._agentO.gameBoard.Obstacles):
                     # print("slot %s is a shallow obstacle! " % curr_slot)
@@ -223,8 +223,8 @@ class Game:
 
                 ri = steps_r.index(curr_slot)
                 oi = steps_o.index(curr_slot)
-                self._board.Slots[i][j].has_been_visited = True
-                self._board.Slots[i][j].covered_by = self._agentO.Name if oi < ri else self._agentR.Name
+                curr_slot.has_been_visited = True
+                curr_slot.covered_by = self._agentO.Name if oi < ri else self._agentR.Name
 
         # make sure all cells, which are not obstacles, are covered
         assert all([(True if self._board.Slots[i][j].has_been_visited else False)
