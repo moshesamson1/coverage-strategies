@@ -1,9 +1,11 @@
 import operator
 from math import fabs
 from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent, Board
+from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
+from functools import cmp_to_key
 
 
-def assign_level_to_slots(board:Board, init:Slot, levelType:int=8):
+def assign_level_to_slots(board: Board, init: Slot, levelType: int = 8):
     leveled_vertices = {}
 
     # Mark all the vertices as not visited
@@ -22,7 +24,7 @@ def assign_level_to_slots(board:Board, init:Slot, levelType:int=8):
 
         neighbors = s.get_inbound_neighbors(board) if levelType == 4 else s.get_8_inbound_neighbors(board)
 
-        for i in [i for i in neighbors]:
+        for i in [i for i in neighbors if not is_slot_shallow_obstacle(i, board.Obstacles)]:
             if not visited[i]:
                 queue.append((i, l + 1))
                 visited[i] = True
@@ -30,13 +32,14 @@ def assign_level_to_slots(board:Board, init:Slot, levelType:int=8):
     return leveled_vertices
 
 
-def cover_current_level(level, current:Slot, board:Board, leveled_slots):
+def cover_current_level(level, current: Slot, board: Board, leveled_slots):
     slots = [current]
     current_slot = current
-    level_amount = len([i for i in leveled_slots.values() if i==level])
+    level_amount = len([i for i in leveled_slots.values() if i == level])
 
-    leveled_neighbors = lambda slot: [i for i in current_slot.get_inbound_neighbors(board) if leveled_slots[i] == level]
-    nonpresent_leveled_neighbors = lambda slot,l: [i for i in leveled_neighbors(slot) if i not in l]
+    leveled_neighbors = lambda slot: [i for i in current_slot.get_inbound_neighbors(board)
+                                      if leveled_slots.get(i) == level]
+    nonpresent_leveled_neighbors = lambda slot, l: [i for i in leveled_neighbors(slot) if i not in l]
 
     # go toward a neighbor of the same level, covering until having a single neighbor with level value
     uncovered_inbound_neighbors = nonpresent_leveled_neighbors(current_slot, slots)
@@ -49,8 +52,8 @@ def cover_current_level(level, current:Slot, board:Board, leveled_slots):
     doubly_covered_slots = []
     # if reached to this point, go until there is a cell with uncovered neighbor, and from there cover until done.
     # if len(set(slots)) < level_amount:
-        # go until at a cell with uncovered neighbor
-    previous_slot = Slot(-1,-1)
+    # go until at a cell with uncovered neighbor
+    previous_slot = Slot(-1, -1)
     while len(set(slots)) < level_amount:
         uncovered_leveled_slots = nonpresent_leveled_neighbors(current_slot, doubly_covered_slots)
         if not uncovered_leveled_slots:
@@ -66,7 +69,7 @@ def cover_current_level(level, current:Slot, board:Board, leveled_slots):
 
 
 class LongestToReach_Strategy(Strategy):
-    def get_steps(self, agent_r:Agent, board_size = 50, agent_o:Agent = None):
+    def get_steps(self, agent_r: Agent, board_size=50, agent_o: Agent = None):
         assert agent_o is not None
 
         # 1. perform bfs and set LEVEL values
@@ -80,7 +83,7 @@ class LongestToReach_Strategy(Strategy):
 
         # get the 'farthest' cell from R's initial location
         initial_level_assignment = assign_level_to_slots(board=agent_o.gameBoard,
-                                                         init=Slot(agent_o.InitPosX,agent_o.InitPosY),
+                                                         init=Slot(agent_o.InitPosX, agent_o.InitPosY),
                                                          levelType=4)
         farthest_slot = max(initial_level_assignment.items(), key=operator.itemgetter(1))[0]
 
@@ -89,12 +92,17 @@ class LongestToReach_Strategy(Strategy):
         leveled_slots = assign_level_to_slots(board, farthest_slot)
 
         # define lambda
-        there_are_cells_to_cover = lambda : len(set(self.steps)) < board.Rows*board.Cols
-        distance = lambda a,b: fabs(a.row-b.row)+fabs(a.col-b.col)
-        edges_and_distance_score = lambda slot: len(slot.get_inbound_neighbors(board))*10 + distance(slot,Slot(agent_r.InitPosX, agent_r.InitPosY))
+        def there_are_cells_to_cover():
+            return len(set(self.steps)) + len(board.get_shallow_obstacles()) < board.Rows * board.Cols
+
+        def distance(a,b):
+            return fabs(a.row - b.row) + fabs(a.col - b.col)
+
+        def edges_and_distance_score(slot:Slot):
+            return len(slot.get_inbound_neighbors(board)) * 10 + distance(slot, Slot(agent_r.InitPosX, agent_r.InitPosY))
 
         max_level = min(leveled_slots.values())
-        max_leveled_slots = [i for i in leveled_slots if leveled_slots[i]==max_level]
+        max_leveled_slots = [i for i in leveled_slots if leveled_slots[i] == max_level]
         ordered_max_leveled_slots = sorted(max_leveled_slots, key=edges_and_distance_score)
 
         # 2. go to cell with highest LEVEL value
@@ -124,16 +132,17 @@ class LongestToReach_Strategy(Strategy):
                 current_slot = level_steps[-1]
 
             #   3.2. if next level adjacent, go there
-            preferred_n = Slot(-1,-1)
+            preferred_n = Slot(-1, -1)
             current_slot_neighbors = current_slot.get_inbound_neighbors(board)
 
-            if any([(leveled_slots.get(i) == leveled_slots.get(current_slot)+1) for i in current_slot_neighbors]):
+            if any([(leveled_slots.get(i) == leveled_slots.get(current_slot) + 1) for i in current_slot_neighbors]):
                 for n in current_slot_neighbors:
-                    if n not in covered_slots and leveled_slots[n] == leveled_slots[current_slot]+1:
-                        if preferred_n == Slot(-1,-1) or len(n.get_inbound_neighbors(board)) < len(preferred_n.get_inbound_neighbors(board)):
+                    if n not in covered_slots and leveled_slots[n] == leveled_slots[current_slot] + 1:
+                        if preferred_n == Slot(-1, -1) or len(n.get_inbound_neighbors(board)) < len(
+                                preferred_n.get_inbound_neighbors(board)):
                             preferred_n = n
 
-                if preferred_n != Slot(-1,-1):
+                if preferred_n != Slot(-1, -1):
                     if preferred_n.row == -1:
                         pass
                     current_slot = preferred_n
@@ -146,10 +155,21 @@ class LongestToReach_Strategy(Strategy):
                 if not there_are_cells_to_cover():
                     break
 
-                print(current_slot)
-                print([i for i in leveled_slots.keys() if i not in self.steps])
-                raise Exception("Unhandled Code!")
-                #   3.3  if next level not adjacent, and process not finished, search for next level (higher than 0) and go there
-                #   3.4 from there, cover with increasing level values until no more slots are to cover
-                pass
+                # for j in [i for i in leveled_slots.keys() if i not in self.steps]:
+                #     print("%s:%s" % (j, leveled_slots[j]))
+
+                # find_closest_uncovered_slot
+                cus = min([i for i in leveled_slots.keys() if i not in self.steps],
+                          key=lambda a: distance(a, current_slot))
+                current_slot = cus
+                self.steps.append(current_slot)
+                covered_slots.append(current_slot)
+                continue
+                # print("closest ucs is: %s" %cus)
+
+                raise Exception("Unhandled Code! Slot: %s" % current_slot)
+                #   3.3  if next level not adjacent, and process not finished, search for next level
+                #   (higher than 0) and go there
+                #   3.4 from there, cover with decreasing level values until no more slots are to cover
+
         return self.steps

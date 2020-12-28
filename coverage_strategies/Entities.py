@@ -31,6 +31,9 @@ class Board:
     def add_obstacles(self,obs=[]):
         self.Obstacles.extend(obs)
 
+    def get_shallow_obstacles(self):
+        return [s for sl in self.Slots for s in sl if is_slot_shallow_obstacle(s, self.Obstacles)]
+
 class Slot:
     def __init__(self, x, y):
         self.has_been_visited = False
@@ -213,18 +216,12 @@ class Game:
             if not len(steps_o) == len(steps_r):
                 raise AssertionError("wrong length! len(steps_o)={}, len(steps_r)={}".format(len(steps_o),len(steps_r)))
 
-        for i in range(self._board.Rows):
-            for j in range(self._board.Cols):
-                curr_slot = self._board.Slots[i][j]
-
-                if is_slot_shallow_obstacle(curr_slot, self._agentO.gameBoard.Obstacles):
-                    # print("slot %s is a shallow obstacle! " % curr_slot)
-                    continue
-
-                ri = steps_r.index(curr_slot)
-                oi = steps_o.index(curr_slot)
-                curr_slot.has_been_visited = True
-                curr_slot.covered_by = self._agentO.Name if oi < ri else self._agentR.Name
+        for curr_slot in [s for sl in self._board.Slots for s in sl
+                          if not is_slot_shallow_obstacle(s, self._agentO.gameBoard.Obstacles)]:
+            ri = steps_r.index(curr_slot)
+            oi = steps_o.index(curr_slot)
+            curr_slot.has_been_visited = True
+            curr_slot.covered_by = self._agentO.Name if oi < ri else self._agentR.Name
 
         # make sure all cells, which are not obstacles, are covered
         assert all([(True if self._board.Slots[i][j].has_been_visited else False)
@@ -233,16 +230,10 @@ class Game:
         return self.get_r_gain(), self.get_o_gain()
 
     def get_r_gain(self):
-        cond_count = len([None for i in range(self._board.Rows) for j in range(self._board.Cols)
-                          if self._board.Slots[i][j].covered_by == self._agentR.Name])
-
-        return float(cond_count)
+        return float(len([s for sl in self._board.Slots for s in sl if s.covered_by == self._agentR.Name]))
 
     def get_o_gain(self):
-        cond_count = len([None for i in range(self._board.Rows) for j in range(self._board.Cols)
-                          if self._board.Slots[i][j].covered_by == self._agentO.Name])
-
-        return float(cond_count)
+        return float(len([s for sl in self._board.Slots for s in sl if s.covered_by == self._agentO.Name]))
 
     @property
     def board(self):
