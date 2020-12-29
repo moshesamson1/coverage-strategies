@@ -135,9 +135,10 @@ class LongestToReach_Strategy(Strategy):
             preferred_n = Slot(-1, -1)
             current_slot_neighbors = current_slot.get_inbound_neighbors(board)
 
-            if any([(leveled_slots.get(i) == leveled_slots.get(current_slot) + 1) for i in current_slot_neighbors]):
+            if any([(leveled_slots.get(i) == leveled_slots.get(current_slot) + 1) for i in current_slot_neighbors
+                    if i not in covered_slots]):
                 for n in current_slot_neighbors:
-                    if n not in covered_slots and leveled_slots[n] == leveled_slots[current_slot] + 1:
+                    if leveled_slots[n] == leveled_slots[current_slot] + 1:
                         if preferred_n == Slot(-1, -1) or len(n.get_inbound_neighbors(board)) < len(
                                 preferred_n.get_inbound_neighbors(board)):
                             preferred_n = n
