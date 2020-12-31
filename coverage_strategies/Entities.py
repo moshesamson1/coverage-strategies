@@ -3,7 +3,8 @@ from abc import abstractmethod
 from enum import Enum
 import numpy as np
 
-# from coverage_strategies.StrategyGenerator import get_strategy_from_enum
+from coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
+from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
 
 
 class Board:
@@ -29,6 +30,9 @@ class Board:
 
     def add_obstacles(self,obs=[]):
         self.Obstacles.extend(obs)
+
+    def get_shallow_obstacles(self):
+        return [s for sl in self.Slots for s in sl if is_slot_shallow_obstacle(s, self.Obstacles)]
 
 class Slot:
     def __init__(self, x, y):
@@ -58,6 +62,9 @@ class Slot:
 
     def go_south(self):
         return Slot(self.row + 1, self.col)
+
+    def in_bounds(self, board:Board):
+        return 0 <= self.row < board.Rows and 0 <= self.col < board.Cols
 
     def go(self, s, opposite_direction = False):
         """
@@ -96,6 +103,19 @@ class Slot:
     def __repr__(self):
         return str(self)
 
+    def get_inbound_neighbors(self, board: Board):
+        return [i for i in [self.go_south(), self.go_east(), self.go_west(), self.go_north()] if i.in_bounds(board)]
+
+    def get_8_inbound_neighbors(self, board:Board):
+        return [i for i in [self.go_south(),
+                            self.go_east(),
+                            self.go_west(),
+                            self.go_north(),
+                            self.go_south().go_west(),
+                            self.go_north().go_west(),
+                            self.go_south().go_east(),
+                            self.go_north().go_east()]
+                if i.in_bounds(board)]
 
 class StrategyEnum(Enum):
     VerticalCoverageCircular = 0
@@ -196,44 +216,24 @@ class Game:
             if not len(steps_o) == len(steps_r):
                 raise AssertionError("wrong length! len(steps_o)={}, len(steps_r)={}".format(len(steps_o),len(steps_r)))
 
-        for i in range(min(len(steps_r), len(steps_o))):
-            # perform step for R
-            step_r = steps_r[i]
-            if not self._board.Slots[int(step_r.row)][int(step_r.col)].has_been_visited:
-                self._board.Slots[int(step_r.row)][int(step_r.col)].has_been_visited = True
-                self._board.Slots[int(step_r.row)][int(step_r.col)].covered_by = self._agentR.Name
+        for curr_slot in [s for sl in self._board.Slots for s in sl
+                          if not is_slot_shallow_obstacle(s, self._agentO.gameBoard.Obstacles)]:
+            ri = steps_r.index(curr_slot)
+            oi = steps_o.index(curr_slot)
+            curr_slot.has_been_visited = True
+            curr_slot.covered_by = self._agentO.Name if oi < ri else self._agentR.Name
 
-            # then perform step for O
-            step_o = steps_o[i]
-            if not self._board.Slots[int(step_o.row)][int(step_o.col)].has_been_visited:
-                self._board.Slots[int(step_o.row)][int(step_o.col)].has_been_visited = True
-                self._board.Slots[int(step_o.row)][int(step_o.col)].covered_by = self._agentO.Name
-
+        # make sure all cells, which are not obstacles, are covered
+        assert all([(True if self._board.Slots[i][j].has_been_visited else False)
+                    for i in range(self._board.Rows) for j in range(self._board.Cols)
+                    if not is_slot_shallow_obstacle(Slot(i,j), self.board.Obstacles)])
         return self.get_r_gain(), self.get_o_gain()
+
     def get_r_gain(self):
-        cond_count = 0
-
-        # print self._board.Slots
-
-        for i in range(0, self._board.Rows):
-            for j in range(0, self._board.Cols):
-                if self._board.Slots[i][j].covered_by == self._agentR.Name:
-                    cond_count += 1
-
-        return float(cond_count)
+        return float(len([s for sl in self._board.Slots for s in sl if s.covered_by == self._agentR.Name]))
 
     def get_o_gain(self):
-        cond_count = 0
-
-        size_x = len(self._board.Slots)
-        size_y = len(self._board.Slots[0])
-
-        for i in range(0, size_x):
-            for j in range(0, size_y):
-                if self._board.Slots[i][j].covered_by == self._agentO.Name:
-                    cond_count += 1
-
-        return float(cond_count)
+        return float(len([s for sl in self._board.Slots for s in sl if s.covered_by == self._agentO.Name]))
 
     @property
     def board(self):
@@ -242,7 +242,7 @@ class Game:
 
 class Strategy:
     __metaclass__ = ABCMeta
-    steps = [] # type: List[Slot]
+    steps = [] # type: list[Slot]
 
     def __init__(self):
         self.steps = []
@@ -279,6 +279,18 @@ class Strategy:
         return steps_to_return
 
     @classmethod
+    def go_from_a_to_b_dijkstra(self, a, b, board):
+        g = get_graph_from_board(board)
+        dijkstra(g,g.get_vertex(a), g.get_vertex(b))
+
+        target = g.get_vertex(b)
+        path = [target.get_id()]
+        shortest(target, path)
+
+        return path[::-1]
+
+
+    @classmethod
     def get_farthest_corner(self, a, board_size):
         """
         return the farthest corner from a given position
@@ -289,4 +301,3 @@ class Strategy:
         f_row = 0 if a.row > board_size / 2 else board_size - 1
         f_col = 0 if a.col > board_size / 2 else board_size - 1
         return Slot(f_row, f_col)
-
