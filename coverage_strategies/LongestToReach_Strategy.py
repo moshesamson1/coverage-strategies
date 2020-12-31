@@ -150,14 +150,18 @@ class LongestToReach_Strategy(Strategy):
                     covered_slots.append(current_slot)
                     self.steps.append(current_slot)
                     # break
+                else:
+                    raise Exception("Unhandled Code! Slot: %s" % current_slot)
             else:
                 # reaching this case means all current slot's neighbors are already covered. either coverage is done,
                 # or we have reached a dead end, and should look for the closest uncovered cell.
                 if not there_are_cells_to_cover():
                     break
 
-                # for j in [i for i in leveled_slots.keys() if i not in self.steps]:
-                #     print("%s:%s" % (j, leveled_slots[j]))
+                #   3.3  if next level not adjacent, and process not finished, search for next level
+                #   (higher than 0) and go there
+                #   3.4 from there, cover with decreasing level values until no more slots are to cover
+
 
                 # find_closest_uncovered_slot
                 cus = min([i for i in leveled_slots.keys() if i not in self.steps],
@@ -168,9 +172,5 @@ class LongestToReach_Strategy(Strategy):
                 continue
                 # print("closest ucs is: %s" %cus)
 
-                raise Exception("Unhandled Code! Slot: %s" % current_slot)
-                #   3.3  if next level not adjacent, and process not finished, search for next level
-                #   (higher than 0) and go there
-                #   3.4 from there, cover with decreasing level values until no more slots are to cover
 
         return self.steps
