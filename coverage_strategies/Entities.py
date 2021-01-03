@@ -34,7 +34,11 @@ class Board:
             return [i for j in b.Slots for i in j if is_slot_shallow_obstacle(i,o)]
 
         while len(get_shallow_obs(self,obs)) < (percentage/100.0)*self.Rows*self.Cols:
-            o = random.choice([i for j in self.Slots for i in j if i not in self.Obstacles and i not in init_positions])
+            o = random.choice([i for j in self.Slots for i in j
+                               if i not in self.Obstacles and
+                               i not in init_positions and
+                               0 < i.row < self.Rows-1 and
+                               0 < i.col <self.Cols-1])
             obs.append(o)
         self.add_obstacles(obs)
         # print(self.Obstacles)
@@ -243,6 +247,8 @@ class Game:
 
         for curr_slot in [s for sl in self._board.Slots for s in sl
                           if not is_slot_shallow_obstacle(s, self._agentO.gameBoard.Obstacles)]:
+            # print(self._agentO.gameBoard.Obstacles)
+            # exit(1)
             ri = steps_r.index(curr_slot)
             oi = steps_o.index(curr_slot)
             curr_slot.has_been_visited = True
