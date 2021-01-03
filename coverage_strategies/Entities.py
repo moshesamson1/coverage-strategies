@@ -30,8 +30,13 @@ class Board:
     def populate_with_obstacles(self, percentage: int, init_positions:list):
         import random
         obs = []
+
         def get_shallow_obs(b:Board, o):
             return [i for j in b.Slots for i in j if is_slot_shallow_obstacle(i,o)]
+
+        def is_still_connected():
+            leveled_slots = assign_level_to_slots(self,Slot(0,0))
+            return not any([ss not in leveled_slots and not is_slot_shallow_obstacle(ss, self.Obstacles) for ss in [i for j in self.Slots for i in j]])
 
         while len(get_shallow_obs(self,obs)) < (percentage/100.0)*self.Rows*self.Cols:
             o = random.choice([i for j in self.Slots for i in j
@@ -39,7 +44,12 @@ class Board:
                                i not in init_positions and
                                0 < i.row < self.Rows-1 and
                                0 < i.col <self.Cols-1])
-            obs.append(o)
+
+            if is_still_connected():
+                obs.append(o)
+            else:
+                print("tried to unconnected the graph, for god sake! keep trying")
+
         self.add_obstacles(obs)
         # print(self.Obstacles)
         # print(get_shallow_obs(self,self.Obstacles))
