@@ -3,9 +3,8 @@ from abc import abstractmethod
 from enum import Enum
 import numpy as np
 
-from coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
+from coverage_strategies.Dijkstra import  get_graph_from_board, dijkstra, shortest
 from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
-
 
 class Board:
     def __init__(self, rows, cols):
@@ -28,7 +27,33 @@ class Board:
             s.is_occupied = False
             s.covered_by = "*"
 
-    def add_obstacles(self,obs=[]):
+    def populate_with_obstacles(self, percentage: int, init_positions:list):
+        import random
+        obs = []
+        def get_shallow_obs(b:Board, o):
+            return [i for j in b.Slots for i in j if is_slot_shallow_obstacle(i,o)]
+
+        while len(get_shallow_obs(self,obs)) < (percentage/100.0)*self.Rows*self.Cols:
+            o = random.choice([i for j in self.Slots for i in j if i not in self.Obstacles and i not in init_positions])
+            obs.append(o)
+        self.add_obstacles(obs)
+        # print(self.Obstacles)
+        # print(get_shallow_obs(self,self.Obstacles))
+
+
+
+        # obstacles = random.sample(shallow_slots,int((percentage/100.0)*len(shallow_slots)))
+        # print(obstacles)
+        # self.add_obstacles(obstacles)
+        # check if the graph is still connected
+        # leveled_slots = assign_level_to_slots(self,Slot(0,0))
+        #
+        # if any([ss not in leveled_slots and not is_slot_shallow_obstacle(ss, self.Obstacles) for ss in shallow_slots]):
+        #     print('the graph is not connected!')
+        #     exit(1)
+
+
+    def add_obstacles(self,obs):
         self.Obstacles.extend(obs)
 
     def get_shallow_obstacles(self):
@@ -301,3 +326,31 @@ class Strategy:
         f_row = 0 if a.row > board_size / 2 else board_size - 1
         f_col = 0 if a.col > board_size / 2 else board_size - 1
         return Slot(f_row, f_col)
+
+
+
+def assign_level_to_slots(board: Board, init: Slot, levelType: int = 8):
+    leveled_vertices = {}
+
+    # Mark all the vertices as not visited
+    visited = {i: False for j in board.Slots for i in j}
+    queue = [(init, 0)]
+    visited[init] = True
+    while queue:
+        s, l = queue.pop(0)
+        leveled_vertices[s] = l
+
+        # Get all adjacent vertices of the
+        # dequeued vertex s. If a adjacent
+        # has not been visited, then mark it
+        # visited and enqueue it.
+        # all unvisited neighbors get level value of +1 of the current level value
+
+        neighbors = s.get_inbound_neighbors(board) if levelType == 4 else s.get_8_inbound_neighbors(board)
+
+        for i in [i for i in neighbors if not is_slot_shallow_obstacle(i, board.Obstacles)]:
+            if not visited.get(i):
+                queue.append((i, l + 1))
+                visited[i] = True
+
+    return leveled_vertices
