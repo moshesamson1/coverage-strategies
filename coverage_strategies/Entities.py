@@ -28,7 +28,7 @@ class Board:
             s.is_occupied = False
             s.covered_by = "*"
 
-    def populate_with_obstacles(self, percentage: int, init_positions: list):
+    def populate_with_obstacles(self, percentage: float, init_positions: list):
         import random
         obs = []
 
