@@ -3,8 +3,9 @@ from abc import abstractmethod
 from enum import Enum
 import numpy as np
 
-from coverage_strategies.Dijkstra import  get_graph_from_board, dijkstra, shortest
+from coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
 from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
+
 
 class Board:
     def __init__(self, rows, cols):
@@ -27,48 +28,28 @@ class Board:
             s.is_occupied = False
             s.covered_by = "*"
 
-    def populate_with_obstacles(self, percentage: int, init_positions:list):
+    def populate_with_obstacles(self, percentage: int, init_positions: list):
         import random
         obs = []
 
-        def get_shallow_obs(b:Board, o):
-            return [i for j in b.Slots for i in j if is_slot_shallow_obstacle(i,o)]
+        def get_shallow_obs(b: Board, o):
+            return [i for j in b.Slots for i in j if is_slot_shallow_obstacle(i, o)]
 
         def is_still_connected():
-            leveled_slots = assign_level_to_slots(self,Slot(0,0))
-            return not any([ss not in leveled_slots and not is_slot_shallow_obstacle(ss, self.Obstacles) for ss in [i for j in self.Slots for i in j]])
+            leveled_slots = assign_level_to_slots(self, Slot(0, 0), levelType=4)
+            return self.Rows*self.Cols - len(self.get_shallow_obstacles()) == len(leveled_slots)
+            # return not any([ss not in leveled_slots and not is_slot_shallow_obstacle(ss, self.Obstacles) for ss in [i for j in self.Slots for i in j]])
 
-        while len(get_shallow_obs(self,obs)) < (percentage/100.0)*self.Rows*self.Cols:
+        while len(self.get_shallow_obstacles()) < (percentage / 100.0) * self.Rows * self.Cols:
             o = random.choice([i for j in self.Slots for i in j
                                if i not in self.Obstacles and
                                i not in init_positions and
-                               0 < i.row < self.Rows-1 and
-                               0 < i.col <self.Cols-1])
+                               0 < i.row < self.Rows - 1 and
+                               0 < i.col < self.Cols - 1])
 
-            if is_still_connected():
-                obs.append(o)
-            else:
-                print("tried to unconnected the graph, for god sake! keep trying")
-
-        self.add_obstacles(obs)
-        # print(self.Obstacles)
-        # print(get_shallow_obs(self,self.Obstacles))
-
-
-
-        # obstacles = random.sample(shallow_slots,int((percentage/100.0)*len(shallow_slots)))
-        # print(obstacles)
-        # self.add_obstacles(obstacles)
-        # check if the graph is still connected
-        # leveled_slots = assign_level_to_slots(self,Slot(0,0))
-        #
-        # if any([ss not in leveled_slots and not is_slot_shallow_obstacle(ss, self.Obstacles) for ss in shallow_slots]):
-        #     print('the graph is not connected!')
-        #     exit(1)
-
-
-    def add_obstacles(self,obs):
-        self.Obstacles.extend(obs)
+            self.Obstacles.append(o)
+            if not is_still_connected():
+                self.Obstacles.remove(o)
 
     def get_shallow_obstacles(self):
         return [s for sl in self.Slots for s in sl if is_slot_shallow_obstacle(s, self.Obstacles)]
@@ -79,7 +60,7 @@ class Slot:
         self.covered_by = "*"
         self.row = x
         self.col = y
-        self.Name = "("+str(x) + "," + str(y) + ")"
+        self.Name = "(" + str(x) + "," + str(y) + ")"
 
     def __eq__(self, other):
         return self.row == other.row and self.col == other.col
@@ -102,10 +83,10 @@ class Slot:
     def go_south(self):
         return Slot(self.row + 1, self.col)
 
-    def in_bounds(self, board:Board):
+    def in_bounds(self, board: Board):
         return 0 <= self.row < board.Rows and 0 <= self.col < board.Cols
 
-    def go(self, s, opposite_direction = False):
+    def go(self, s, opposite_direction=False):
         """
         Go South, East, North or West, according to the given parameter.
         :param s: Must by 'd', 'r','n','l'
@@ -145,7 +126,7 @@ class Slot:
     def get_inbound_neighbors(self, board: Board):
         return [i for i in [self.go_south(), self.go_east(), self.go_west(), self.go_north()] if i.in_bounds(board)]
 
-    def get_8_inbound_neighbors(self, board:Board):
+    def get_8_inbound_neighbors(self, board: Board):
         return [i for i in [self.go_south(),
                             self.go_east(),
                             self.go_west(),
@@ -155,6 +136,7 @@ class Slot:
                             self.go_south().go_east(),
                             self.go_north().go_east()]
                 if i.in_bounds(board)]
+
 
 class StrategyEnum(Enum):
     VerticalCoverageCircular = 0
@@ -193,11 +175,12 @@ class Agent:
 
     def get_tdv(self):
         from math import fabs
-        return sum([(1/(1+stepI))*(fabs(self.steps[stepI].row - self.steps[0].row)+fabs(self.steps[stepI].col - self.steps[0].col)) for stepI in range(len(self.steps))])
+        return sum([(1 / (1 + stepI)) * (
+                    fabs(self.steps[stepI].row - self.steps[0].row) + fabs(self.steps[stepI].col - self.steps[0].col))
+                    for stepI in range(len(self.steps))])
 
     def get_frame(self):
         pass
-
 
     def get_strategy(self):
         return self.Strategy.__str__()
@@ -205,7 +188,7 @@ class Agent:
     def get_strategy_short(self):
         return self.get_strategy()[:5] + "..."
 
-    def display_heat_map(self,x,y):
+    def display_heat_map(self, x, y):
         arr = self.get_heatmap()
         # DisplayingClass.create_heat_map(arr, x, y, self.get_strategy_short())
 
@@ -241,8 +224,9 @@ class Agent:
     #     #                                                                           np.average(c),
     #     #                                                                           np.std(c)))
 
+
 class Game:
-    def __init__(self, agent_r: Agent, agent_o: Agent, size=(100,100)) -> None:
+    def __init__(self, agent_r: Agent, agent_o: Agent, size=(100, 100)) -> None:
         self._board = agent_r.gameBoard
         self._agentR = agent_r
         self._agentO = agent_o
@@ -253,7 +237,8 @@ class Game:
 
         if enforce_paths_length:
             if not len(steps_o) == len(steps_r):
-                raise AssertionError("wrong length! len(steps_o)={}, len(steps_r)={}".format(len(steps_o),len(steps_r)))
+                raise AssertionError(
+                    "wrong length! len(steps_o)={}, len(steps_r)={}".format(len(steps_o), len(steps_r)))
 
         for curr_slot in [s for sl in self._board.Slots for s in sl
                           if not is_slot_shallow_obstacle(s, self._agentO.gameBoard.Obstacles)]:
@@ -267,7 +252,7 @@ class Game:
         # make sure all cells, which are not obstacles, are covered
         assert all([(True if self._board.Slots[i][j].has_been_visited else False)
                     for i in range(self._board.Rows) for j in range(self._board.Cols)
-                    if not is_slot_shallow_obstacle(Slot(i,j), self.board.Obstacles)])
+                    if not is_slot_shallow_obstacle(Slot(i, j), self.board.Obstacles)])
         return self.get_r_gain(), self.get_o_gain()
 
     def get_r_gain(self):
@@ -283,7 +268,7 @@ class Game:
 
 class Strategy:
     __metaclass__ = ABCMeta
-    steps = [] # type: list[Slot]
+    steps = []  # type: list[Slot]
 
     def __init__(self):
         self.steps = []
@@ -294,7 +279,7 @@ class Strategy:
 
     @classmethod
     @abstractmethod
-    def get_steps(self, agent_r, board_size = 50, agent_o = None):
+    def get_steps(self, agent_r, board_size=50, agent_o=None):
         """Returns the steps agent perform to cover the world"""
 
     @classmethod
@@ -322,14 +307,13 @@ class Strategy:
     @classmethod
     def go_from_a_to_b_dijkstra(self, a, b, board):
         g = get_graph_from_board(board)
-        dijkstra(g,g.get_vertex(a), g.get_vertex(b))
+        dijkstra(g, g.get_vertex(a), g.get_vertex(b))
 
         target = g.get_vertex(b)
         path = [target.get_id()]
         shortest(target, path)
 
         return path[::-1]
-
 
     @classmethod
     def get_farthest_corner(self, a, board_size):
@@ -342,7 +326,6 @@ class Strategy:
         f_row = 0 if a.row > board_size / 2 else board_size - 1
         f_col = 0 if a.col > board_size / 2 else board_size - 1
         return Slot(f_row, f_col)
-
 
 
 def assign_level_to_slots(board: Board, init: Slot, levelType: int = 8):
@@ -370,3 +353,16 @@ def assign_level_to_slots(board: Board, init: Slot, levelType: int = 8):
                 visited[i] = True
 
     return leveled_vertices
+
+
+def display_board(b: Board):
+    """
+    takes in a board, and saves it as a csv file.
+    :param b:
+    :return:
+    """
+    import csv
+    with open('./board.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        shallows = b.get_shallow_obstacles()
+        writer.writerows([[(' ' if j not in shallows else '*') for j in i] for i in b.Slots])

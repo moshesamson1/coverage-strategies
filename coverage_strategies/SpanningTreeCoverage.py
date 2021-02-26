@@ -5,35 +5,7 @@ from coverage_strategies.coverage_strategies import Entities
 
 def print_graph(edges, i_o, figure_label=""):
     pass
-    # print("Function is not available in this version!")
-    # plt.figure()
-    # g = nx.DiGraph()
-    # g.add_edges_from(edges)
-    # positions = {}
-    # color_map = []
-    # for n in g.nodes():
-    #     positions[n] = (n.row, n.col)
-    #     if n == edges[0][0]:
-    #         color_map.append('green')
-    #     elif n == i_o:
-    #         color_map.append('blue')
-    #     else:
-    #         color_map.append('red')
-    #     # color_map.append('green' if n == edges[0][0] else 'red')
-    #
-    # f = plt.figure()
-    # nx.draw(G=g, pos=positions, node_size=20, font_size=8, node_color=color_map, ax=f.add_subplot(111))
-    #
-    # if not os.path.exists(figure_label):
-    #     os.makedirs(figure_label)
-    #
-    # f.savefig(figure_label + "/max_path.png", bbox_inches='tight')
-    # plt.close('all')
-    #
-    # # plt.axis([-1, 33, -1, 33], 'on')
-    # # plt.grid(True)
-    #
-    # plt.show()
+
 
 
 def create_graph(edge_list):
