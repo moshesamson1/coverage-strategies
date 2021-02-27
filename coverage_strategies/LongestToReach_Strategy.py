@@ -1,41 +1,15 @@
 import operator
 from math import fabs
-from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent, Board
+from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent, Board, assign_level_to_slots
 from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
-from functools import cmp_to_key
-
-
-def assign_level_to_slots(board: Board, init: Slot, levelType: int = 8):
-    leveled_vertices = {}
-
-    # Mark all the vertices as not visited
-    visited = {i: False for j in board.Slots for i in j}
-    queue = [(init, 0)]
-    visited[init] = True
-    while queue:
-        s, l = queue.pop(0)
-        leveled_vertices[s] = l
-
-        # Get all adjacent vertices of the
-        # dequeued vertex s. If a adjacent
-        # has not been visited, then mark it
-        # visited and enqueue it.
-        # all unvisited neighbors get level value of +1 of the current level value
-
-        neighbors = s.get_inbound_neighbors(board) if levelType == 4 else s.get_8_inbound_neighbors(board)
-
-        for i in [i for i in neighbors if not is_slot_shallow_obstacle(i, board.Obstacles)]:
-            if not visited[i]:
-                queue.append((i, l + 1))
-                visited[i] = True
-
-    return leveled_vertices
 
 
 def cover_current_level(level, current: Slot, board: Board, leveled_slots):
     slots = [current]
     current_slot = current
     level_amount = len([i for i in leveled_slots.values() if i == level])
+
+    # print("covering level %d" % leveled_slots.get(current_slot))
 
     leveled_neighbors = lambda slot: [i for i in current_slot.get_inbound_neighbors(board)
                                       if leveled_slots.get(i) == level]
@@ -60,7 +34,10 @@ def cover_current_level(level, current: Slot, board: Board, leveled_slots):
             break
 
         temp = current_slot
-        current_slot = [i for i in uncovered_leveled_slots if i != previous_slot][0]
+        l = [i for i in uncovered_leveled_slots if i != previous_slot and not is_slot_shallow_obstacle(i, board.Obstacles)]
+        if not l:
+            return slots[1::]
+        current_slot = l[0]
         previous_slot = temp
         doubly_covered_slots.append(current_slot)
         slots.append(current_slot)
@@ -133,7 +110,8 @@ class LongestToReach_Strategy(Strategy):
 
             #   3.2. if next level adjacent, go there
             preferred_n = Slot(-1, -1)
-            current_slot_neighbors = current_slot.get_inbound_neighbors(board)
+            current_slot_neighbors = [n for n in current_slot.get_inbound_neighbors(board)
+                                      if not is_slot_shallow_obstacle(n, board.Obstacles)]
 
             if any([(leveled_slots.get(i) == leveled_slots.get(current_slot) + 1) for i in current_slot_neighbors
                     if i not in covered_slots]):
