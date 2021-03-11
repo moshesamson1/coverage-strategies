@@ -1,4 +1,4 @@
-from coverage_strategies.coverage_strategies.Entities import Strategy
+from coverage_strategies.Entities import Strategy
 
 
 class MinimalCircleOutsodeFromIO_Strategy(Strategy):

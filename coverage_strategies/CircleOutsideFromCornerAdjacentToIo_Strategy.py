@@ -1,4 +1,4 @@
-from coverage_strategies.coverage_strategies.Entities import Slot, Strategy
+from coverage_strategies.Entities import Slot, Strategy
 
 
 class CircleOutsideFromCornerAdjacentToIo_Strategy(Strategy):

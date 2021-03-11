@@ -3,8 +3,8 @@ from abc import abstractmethod
 from enum import Enum
 import numpy as np
 
-from coverage_strategies.coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
-from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
+from coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
+from coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
 
 
 class Board:
@@ -169,7 +169,7 @@ class Agent:
         self.InitPosY = y
         self.gameBoard = board
 
-        from coverage_strategies.coverage_strategies.StrategyGenerator import get_strategy_from_enum
+        from coverage_strategies.StrategyGenerator import get_strategy_from_enum
         self.Strategy = get_strategy_from_enum(strategy_enum)
         self.steps = self.Strategy.get_steps(self, len(board.Slots), agent_o)
 

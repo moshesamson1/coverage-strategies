@@ -1,6 +1,6 @@
 from random import shuffle, random
 from math import floor
-from coverage_strategies.coverage_strategies import Entities
+from coverage_strategies import Entities
 
 
 def print_graph(edges, i_o, figure_label=""):

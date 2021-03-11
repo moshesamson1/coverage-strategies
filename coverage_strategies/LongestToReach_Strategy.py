@@ -1,7 +1,7 @@
 import operator
 from math import fabs
-from coverage_strategies.coverage_strategies.Entities import Slot, Strategy, Agent, Board, assign_level_to_slots
-from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
+from coverage_strategies.Entities import Slot, Strategy, Agent, Board, assign_level_to_slots
+from coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
 
 
 def cover_current_level(level, current: Slot, board: Board, leveled_slots):
