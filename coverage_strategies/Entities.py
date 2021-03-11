@@ -3,7 +3,7 @@ from abc import abstractmethod
 from enum import Enum
 import numpy as np
 
-from coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
+from coverage_strategies.coverage_strategies.Dijkstra import get_graph_from_board, dijkstra, shortest
 from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
 
 

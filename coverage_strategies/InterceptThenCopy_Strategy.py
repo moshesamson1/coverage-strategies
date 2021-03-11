@@ -1,6 +1,6 @@
 import sys
 
-from coverage_strategies.Dijkstra import dijkstra, shortest, Graph, get_graph_from_board
+from coverage_strategies.coverage_strategies.Dijkstra import dijkstra, shortest, Graph, get_graph_from_board
 from coverage_strategies.coverage_strategies.Entities import Strategy, Slot, Board, Agent
 from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
 
