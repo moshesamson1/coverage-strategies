@@ -1,4 +1,4 @@
-from coverage_strategies.coverage_strategies.Entities import Board, Agent, StrategyEnum, Game, Slot
+from coverage_strategies.Entities import Board, Agent, StrategyEnum, Game, Slot
 
 def run_game(pos_r:Slot, pos_o:Slot, w=32, h=32):
     b = Board(w, h)

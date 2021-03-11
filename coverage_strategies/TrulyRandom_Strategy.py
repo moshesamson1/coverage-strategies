@@ -1,4 +1,4 @@
-from coverage_strategies.coverage_strategies.Entities import Strategy, Slot, Agent
+from coverage_strategies.Entities import Strategy, Slot, Agent
 import random
 
 def sublist(lst1, lst2):

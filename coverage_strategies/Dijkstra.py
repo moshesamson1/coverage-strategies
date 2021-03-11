@@ -155,7 +155,7 @@ def get_graph_from_board(b):
                 g.add_vertex(cell)
             for n in [cell.go_north(), cell.go_south(), cell.go_east(), cell.go_west()]:
                 if 0 <= n.row < b.Rows and 0 <= n.col < b.Cols:
-                    from coverage_strategies.coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
+                    from coverage_strategies.SpanningTreeCoverage import is_slot_shallow_obstacle
                     g.add_edge(cell, n, 1 if not (is_slot_shallow_obstacle(cell, b.Obstacles) or
                                                   is_slot_shallow_obstacle(n,b.Obstacles))
                     else sys.maxsize)
